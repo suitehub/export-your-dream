@@ -64,6 +64,7 @@ export const Route = createFileRoute("/")({
 });
 
 const categories = [
+  { label: "Todas", icon: Plus },
   { label: "Emagrecedores", icon: Leaf },
   { label: "Coluna", icon: Sparkles },
   { label: "Beleza e Bem Estar", icon: Flower2 },
@@ -74,8 +75,13 @@ const categories = [
   { label: "Imunidade", icon: ShieldCheck },
   { label: "Cabelos", icon: Sparkles },
   { label: "Saúde da Mulher", icon: Flower2 },
-  { label: "Todas", icon: Plus },
 ];
+
+const allCategories = categories.filter((item) => item.label !== "Todas").map((item) => item.label);
+
+const COLLAPSED_CATEGORIES = 6;
+const COLLAPSED_PRODUCTS = 4;
+
 
 const benefits = [
   { icon: Truck, title: "Entrega para todo o Brasil", copy: "com segurança e agilidade" },
