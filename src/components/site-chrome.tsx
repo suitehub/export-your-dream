@@ -122,17 +122,11 @@ export function SiteHeader({ cartCount = 0 }: { cartCount?: number }) {
                 <SheetDescription>Navegue pela loja.</SheetDescription>
               </SheetHeader>
               <nav className="mt-8 grid gap-1">
-                {[
-                  ["Início", ""],
-                  ["Produtos", "produtos"],
-                  ["Categorias", "categorias"],
-                  ["Sobre", "sobre"],
-                  ["Contato", "contato"],
-                ].map(([label, hash]) => (
+                {["Início", "Produtos", "Categorias", "Sobre", "Contato"].map((label, index) => (
                   <Link
                     key={label}
                     to="/"
-                    hash={hash || undefined}
+                    {...(index === 0 ? {} : { hash: ["", "produtos", "categorias", "sobre", "contato"][index]! })}
                     className="border-b border-border py-4 text-base font-semibold"
                   >
                     {label}
