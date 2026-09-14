@@ -19,6 +19,9 @@
  */
 
 @theme inline {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Cormorant Garamond", serif;
+  --font-script: "Caveat", cursive;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -59,29 +62,37 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-soft: var(--brand-soft);
+  --color-sale: var(--sale);
+  --color-sale-foreground: var(--sale-foreground);
+  --color-whatsapp: var(--whatsapp);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.008 96);
+  --foreground: oklch(0.26 0.035 137);
+  --card: oklch(0.998 0.002 95);
+  --card-foreground: oklch(0.26 0.035 137);
+  --popover: oklch(0.998 0.002 95);
+  --popover-foreground: oklch(0.26 0.035 137);
+  --primary: oklch(0.39 0.09 137);
+  --primary-foreground: oklch(0.99 0.005 95);
+  --secondary: oklch(0.91 0.035 110);
+  --secondary-foreground: oklch(0.30 0.06 137);
+  --muted: oklch(0.955 0.018 100);
+  --muted-foreground: oklch(0.50 0.03 130);
+  --accent: oklch(0.89 0.055 115);
+  --accent-foreground: oklch(0.28 0.065 137);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.90 0.022 105);
+  --input: oklch(0.88 0.025 105);
+  --ring: oklch(0.48 0.09 137);
+  --brand-soft: oklch(0.93 0.038 118);
+  --sale: oklch(0.48 0.20 305);
+  --sale-foreground: oklch(0.99 0.005 95);
+  --whatsapp: oklch(0.67 0.19 148);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +151,86 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+    scroll-behavior: smooth;
   }
+
+  button, a, input { letter-spacing: 0; }
+}
+
+@utility nav-link {
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--color-foreground);
+  transition: color 180ms ease;
+  &:hover { color: var(--color-primary); }
+}
+
+@utility shadow-soft {
+  box-shadow: 0 18px 50px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+@utility shadow-card {
+  box-shadow: 0 7px 22px color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+@utility bg-hero-overlay {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--background) 98%, transparent) 0%, color-mix(in oklab, var(--background) 88%, transparent) 37%, transparent 67%);
+}
+
+@utility bg-banner-overlay {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--background) 98%, transparent) 0%, color-mix(in oklab, var(--background) 88%, transparent) 42%, transparent 72%);
+}
+
+@utility product-crop {
+  background-repeat: no-repeat;
+  background-size: 600% 100%;
+  background-color: var(--color-muted);
+}
+
+@utility payment-mark {
+  display: grid;
+  height: 1.75rem;
+  min-width: 2.5rem;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+@utility newsletter-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: center;
+  gap: 2rem;
+}
+
+@utility leaf-decoration {
+  position: absolute;
+  bottom: -2rem;
+  color: color-mix(in oklab, var(--primary) 30%, transparent);
+  & svg { width: 9rem; height: 9rem; stroke-width: 0.8; }
+}
+
+@utility category-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+@media (max-width: 639px) {
+  .bg-hero-overlay, .bg-banner-overlay {
+    background: linear-gradient(90deg, color-mix(in oklab, var(--background) 97%, transparent) 0%, color-mix(in oklab, var(--background) 84%, transparent) 62%, color-mix(in oklab, var(--background) 15%, transparent) 100%);
+  }
+}
+
+@media (max-width: 1023px) {
+  .newsletter-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
