@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
 import {
   ArrowRight,
@@ -28,6 +28,7 @@ import heroImage from "@/assets/viva-hero.jpg";
 import benefitsImage from "@/assets/viva-benefits.jpg";
 import productsImage from "@/assets/viva-products.jpg";
 import { Button } from "@/components/ui/button";
+import { formatPrice, products } from "@/data/products";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -59,25 +60,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  discount: number;
-  oldPrice: number;
-  price: number;
-  imagePosition: string;
-};
-
-const products: Product[] = [
-  { id: 1, name: "Super Chá Emagrecedor Natural", category: "Emagrecedores", discount: 57, oldPrice: 65.9, price: 28, imagePosition: "0%" },
-  { id: 2, name: "Cactinea — Drenagem Linfática", category: "Detox", discount: 54, oldPrice: 55.9, price: 25, imagePosition: "20%" },
-  { id: 3, name: "Colunex — Cúrcuma Extrato", category: "Coluna", discount: 62, oldPrice: 68.9, price: 26, imagePosition: "40%" },
-  { id: 4, name: "Fiocaps — Vitamina Completa", category: "Vitaminas", discount: 55, oldPrice: 60.9, price: 27, imagePosition: "60%" },
-  { id: 5, name: "Dolomita — Cálcio e Magnésio", category: "Beleza e Bem Estar", discount: 44, oldPrice: 45.5, price: 25, imagePosition: "80%" },
-  { id: 6, name: "Super Slim X", category: "Emagrecedores", discount: 60, oldPrice: 70, price: 28, imagePosition: "100%" },
-];
-
 const categories = [
   { label: "Emagrecedores", icon: Leaf },
   { label: "Coluna", icon: Sparkles },
@@ -98,9 +80,6 @@ const benefits = [
   { icon: ShieldCheck, title: "Compra 100% segura", copy: "seus dados protegidos" },
   { icon: Leaf, title: "Produtos originais", copy: "e de alta qualidade" },
 ];
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
 
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
