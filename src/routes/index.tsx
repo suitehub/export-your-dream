@@ -298,7 +298,12 @@ function Index() {
                 <p className="mt-2 text-xs text-muted-foreground line-through">{formatPrice(product.oldPrice)}</p>
                 <p className="text-lg font-extrabold text-sale">{formatPrice(product.price)}</p>
                 <p className="mb-3 text-[0.68rem] text-muted-foreground">6x de {formatPrice(product.price / 6)}</p>
-                <Button size="sm" className="mt-auto h-auto min-h-9 w-full whitespace-normal px-2 py-2 text-[0.68rem] sm:text-xs" onClick={() => addToCart(product.id)}>Adicionar ao carrinho</Button>
+                <div className="mt-auto grid gap-2">
+                  <Button asChild size="sm" className="h-auto min-h-9 w-full whitespace-normal px-2 py-2 text-[0.68rem] sm:text-xs">
+                    <Link to="/produto/$slug" params={{ slug: product.slug }}>Ver detalhes</Link>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-auto min-h-9 w-full whitespace-normal px-2 py-2 text-[0.68rem] sm:text-xs" onClick={() => addToCart(product.id)}>Adicionar ao carrinho</Button>
+                </div>
               </article>
             ))}
           </div>
