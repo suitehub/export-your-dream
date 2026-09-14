@@ -112,15 +112,42 @@ function Index() {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [newsletterSent, setNewsletterSent] = useState(false);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [sort, setSort] = useState("relevancia");
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categoriesClosing, setCategoriesClosing] = useState(false);
+
+  const toggleCategories = () => {
+    if (categoriesOpen) {
+      setCategoriesClosing(true);
+      window.setTimeout(() => {
+        setCategoriesOpen(false);
+        setCategoriesClosing(false);
+      }, 300);
+      return;
+    }
+    setCategoriesOpen(true);
+  };
+
+  const visibleCategories = categoriesOpen ? categories : categories.slice(0, COLLAPSED_CATEGORIES);
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("pt-BR");
-    return products.filter((product) => {
+    const list = products.filter((product) => {
       const matchesCategory = category === "Todas" || product.category === category;
       const matchesSearch = !normalized || `${product.name} ${product.category}`.toLocaleLowerCase("pt-BR").includes(normalized);
       return matchesCategory && matchesSearch;
     });
-  }, [category, query]);
+    const sorted = [...list];
+    if (sort === "menor-preco") sorted.sort((a, b) => a.price - b.price);
+    if (sort === "maior-preco") sorted.sort((a, b) => b.price - a.price);
+    if (sort === "desconto") sorted.sort((a, b) => b.discount - a.discount);
+    if (sort === "nome") sorted.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    return sorted;
+  }, [category, query, sort]);
+
+  const visibleProducts = showAllProducts ? filteredProducts : filteredProducts.slice(0, COLLAPSED_PRODUCTS);
+
 
   const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
   const subtotal = products.reduce((sum, product) => sum + product.price * (cart[product.id] ?? 0), 0);
