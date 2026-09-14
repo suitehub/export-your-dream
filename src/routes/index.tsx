@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  SlidersHorizontal,
+
   ChevronDown,
   CircleUserRound,
   CreditCard,
@@ -61,6 +64,7 @@ export const Route = createFileRoute("/")({
 });
 
 const categories = [
+  { label: "Todas", icon: Plus },
   { label: "Emagrecedores", icon: Leaf },
   { label: "Coluna", icon: Sparkles },
   { label: "Beleza e Bem Estar", icon: Flower2 },
@@ -71,8 +75,13 @@ const categories = [
   { label: "Imunidade", icon: ShieldCheck },
   { label: "Cabelos", icon: Sparkles },
   { label: "Saúde da Mulher", icon: Flower2 },
-  { label: "Todas", icon: Plus },
 ];
+
+const allCategories = categories.filter((item) => item.label !== "Todas").map((item) => item.label);
+
+const COLLAPSED_CATEGORIES = 6;
+const COLLAPSED_PRODUCTS = 4;
+
 
 const benefits = [
   { icon: Truck, title: "Entrega para todo o Brasil", copy: "com segurança e agilidade" },
@@ -103,15 +112,42 @@ function Index() {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [newsletterSent, setNewsletterSent] = useState(false);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [sort, setSort] = useState("relevancia");
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categoriesClosing, setCategoriesClosing] = useState(false);
+
+  const toggleCategories = () => {
+    if (categoriesOpen) {
+      setCategoriesClosing(true);
+      window.setTimeout(() => {
+        setCategoriesOpen(false);
+        setCategoriesClosing(false);
+      }, 300);
+      return;
+    }
+    setCategoriesOpen(true);
+  };
+
+  const visibleCategories = categoriesOpen ? categories : categories.slice(0, COLLAPSED_CATEGORIES);
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("pt-BR");
-    return products.filter((product) => {
+    const list = products.filter((product) => {
       const matchesCategory = category === "Todas" || product.category === category;
       const matchesSearch = !normalized || `${product.name} ${product.category}`.toLocaleLowerCase("pt-BR").includes(normalized);
       return matchesCategory && matchesSearch;
     });
-  }, [category, query]);
+    const sorted = [...list];
+    if (sort === "menor-preco") sorted.sort((a, b) => a.price - b.price);
+    if (sort === "maior-preco") sorted.sort((a, b) => b.price - a.price);
+    if (sort === "desconto") sorted.sort((a, b) => b.discount - a.discount);
+    if (sort === "nome") sorted.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    return sorted;
+  }, [category, query, sort]);
+
+  const visibleProducts = showAllProducts ? filteredProducts : filteredProducts.slice(0, COLLAPSED_PRODUCTS);
+
 
   const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
   const subtotal = products.reduce((sum, product) => sum + product.price * (cart[product.id] ?? 0), 0);
@@ -247,27 +283,139 @@ function Index() {
 
       <section id="categorias" className="relative z-10 mx-auto -mt-5 max-w-7xl px-4 lg:px-8">
         <div className="rounded-lg border border-border bg-card p-5 shadow-soft sm:p-7">
-          <div className="mb-5 flex items-center justify-between gap-4"><h2 className="font-display text-2xl sm:text-3xl">Navegue por categorias</h2><a href="#produtos" className="hidden items-center gap-2 text-xs font-semibold text-primary sm:flex">Ver todas as categorias <ArrowRight className="h-4 w-4" /></a></div>
-          <div className="category-scroll flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-11 lg:overflow-visible">
-            {categories.map(({ label, icon: Icon }) => {
-              const active = category === label || (category === "Todas" && label === "Todas");
-              return <Button key={label} variant="ghost" onClick={() => { setCategory(label); document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" }); }} className="group h-auto min-w-20 flex-col gap-2 px-1 py-1 text-center hover:bg-transparent" aria-pressed={active}>
-                <span className={`grid h-14 w-14 place-items-center rounded-full transition-colors ${active ? "bg-primary text-primary-foreground" : "bg-brand-soft text-primary group-hover:bg-accent"}`}><Icon className="h-6 w-6" /></span>
-                <span className="whitespace-normal text-[0.68rem] leading-tight text-foreground">{label}</span>
-              </Button>;
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <h2 className="font-display text-2xl sm:text-3xl">Navegue por categorias</h2>
+            <Button
+              variant="ghost"
+              className="hidden items-center gap-2 text-xs font-semibold text-primary sm:inline-flex"
+              onClick={toggleCategories}
+            >
+              {categoriesOpen ? (
+                <>
+                  <ArrowLeft className="h-4 w-4" /> Voltar
+                </>
+              ) : (
+                <>
+                  Ver todas as categorias <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="category-scroll flex gap-3 overflow-x-auto pb-2 lg:grid lg:grid-cols-6 lg:overflow-visible">
+            {visibleCategories.map(({ label, icon: Icon }, index) => {
+              const active = category === label;
+              const extra = index >= COLLAPSED_CATEGORIES;
+              return (
+                <Button
+                  key={label}
+                  variant="ghost"
+                  style={extra ? { animationDelay: `${(index - COLLAPSED_CATEGORIES) * 45}ms`, animationFillMode: "both" } : undefined}
+                  className={`group h-auto min-w-20 flex-col gap-2 px-1 py-1 text-center hover:bg-transparent ${
+                    extra ? (categoriesClosing ? "animate-fade-out" : "animate-fade-in") : ""
+                  }`}
+                  onClick={() => {
+                    setCategory(label);
+                    document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  aria-pressed={active}
+                >
+                  <span
+                    className={`grid h-14 w-14 place-items-center rounded-full transition-colors ${
+                      active ? "bg-primary text-primary-foreground" : "bg-brand-soft text-primary group-hover:bg-accent"
+                    }`}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </span>
+                  <span className="whitespace-normal text-[0.68rem] leading-tight text-foreground">{label}</span>
+                </Button>
+              );
             })}
           </div>
+          <Button variant="outline" className="mt-4 w-full rounded-full sm:hidden" onClick={toggleCategories}>
+            {categoriesOpen ? (
+              <>
+                <ArrowLeft /> Voltar
+              </>
+            ) : (
+              <>
+                Ver todas as categorias <ArrowRight />
+              </>
+            )}
+          </Button>
         </div>
       </section>
 
       <section id="produtos" className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
         <div className="mb-6 flex items-end justify-between gap-4">
-          <div><h2 className="font-display text-3xl sm:text-4xl">Produtos em destaque</h2><p className="mt-1 text-sm text-muted-foreground">Os mais vendidos para sua saúde e bem-estar.</p></div>
-          {(query || category !== "Todas") && <Button variant="outline" className="rounded-full" onClick={() => { setQuery(""); setCategory("Todas"); }}>Limpar filtros <X /></Button>}
+          <div>
+            <h2 className="font-display text-3xl sm:text-4xl">
+              {showAllProducts ? "Todos os produtos" : "Produtos em destaque"}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {showAllProducts
+                ? `${filteredProducts.length} ${filteredProducts.length === 1 ? "produto disponível" : "produtos disponíveis"}.`
+                : "Os mais vendidos para sua saúde e bem-estar."}
+            </p>
+          </div>
+          {(query || category !== "Todas") && (
+            <Button variant="outline" className="rounded-full" onClick={() => { setQuery(""); setCategory("Todas"); }}>
+              Limpar filtros <X />
+            </Button>
+          )}
         </div>
-        {filteredProducts.length ? (
+
+        {showAllProducts && (
+          <div className="mb-7 animate-fade-in rounded-lg border border-border bg-card p-4 shadow-soft sm:p-5">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <label className="relative block">
+                <span className="sr-only">Buscar produtos</span>
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Buscar por nome ou categoria..."
+                  className="h-11 rounded-full bg-muted pl-9 shadow-none"
+                />
+              </label>
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <select
+                  aria-label="Ordenar produtos"
+                  value={sort}
+                  onChange={(event) => setSort(event.target.value)}
+                  className="h-11 w-full rounded-full border border-border bg-background px-4 text-sm lg:w-56"
+                >
+                  <option value="relevancia">Mais relevantes</option>
+                  <option value="menor-preco">Menor preço</option>
+                  <option value="maior-preco">Maior preço</option>
+                  <option value="desconto">Maior desconto</option>
+                  <option value="nome">Nome (A-Z)</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["Todas", ...allCategories].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setCategory(label)}
+                  aria-pressed={category === label}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    category === label
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {visibleProducts.length ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            {filteredProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <article key={product.id} className="group flex min-w-0 flex-col rounded-md border border-border bg-card p-2.5 shadow-card transition-transform hover:-translate-y-1">
                 <div className="relative overflow-hidden rounded-md bg-muted">
                   <span className="absolute right-1.5 top-1.5 z-10 rounded-full bg-sale px-2 py-1 text-[0.62rem] font-bold text-sale-foreground">{product.discount}% OFF</span>
@@ -287,7 +435,30 @@ function Index() {
             ))}
           </div>
         ) : <div className="border-y border-border py-16 text-center"><Search className="mx-auto mb-3 h-7 w-7 text-muted-foreground" /><p className="font-display text-2xl">Nenhum produto encontrado</p><p className="mt-1 text-sm text-muted-foreground">Tente outro termo ou categoria.</p></div>}
+
+        <div className="mt-9 flex justify-center">
+          <Button
+            size="lg"
+            variant={showAllProducts ? "outline" : "default"}
+            className="h-12 rounded-full px-8"
+            onClick={() => {
+              setShowAllProducts((current) => !current);
+              if (showAllProducts) document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            {showAllProducts ? (
+              <>
+                <ArrowLeft /> Ver menos produtos
+              </>
+            ) : (
+              <>
+                Ver todos os produtos <ArrowRight />
+              </>
+            )}
+          </Button>
+        </div>
       </section>
+
 
       <section className="relative min-h-[28rem] overflow-hidden sm:min-h-[25rem]">
         <img src={benefitsImage} alt="Cápsulas fitoterápicas, ervas e pó natural" width={1536} height={640} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-[65%_center]" />
